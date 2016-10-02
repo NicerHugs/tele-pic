@@ -1,0 +1,22 @@
+body {
+	margin: 0;
+}
+
+h1 {
+	text-align: center;
+}
+
+canvas {
+	border: solid 1px black;
+	box-sizing: border-box;
+	margin: 0 auto;
+	display: block;
+	cursor: crosshair;
+}
+
+.next {
+	display: none;
+}
+.finish{
+	display: none;
+}
