@@ -1,9 +1,47 @@
 body {
-	margin: 0;
+	margin: 0 auto;
+	max-width: 600px;
+	width: 100%;
+	font-family: sans-serif;
+	text-align: center;
+	color: #1C2C34;
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+}
+
+textarea {
+	min-height: 3em;
+	width: 100%;
+	border: 1px solid #1C2C34;
+}
+
+textarea:focus {
+	outline: none;
 }
 
 h1 {
 	text-align: center;
+	margin: 10px 0;
+}
+
+h2 {
+	padding: .5em;
+}
+
+#display-area {
+	flex-grow: 0;
+	display: flex;
+}
+#display-area.finished {
+	display: block;
+}
+
+#user-input {
+	flex-grow: 1;
+	display: flex;
+	align-items: stretch;
+	padding: 0 10px 10px;
 }
 
 canvas {
@@ -12,6 +50,7 @@ canvas {
 	margin: 0 auto;
 	display: block;
 	cursor: crosshair;
+	width: 100%;
 }
 
 .next {
@@ -19,4 +58,30 @@ canvas {
 }
 .finish{
 	display: none;
+}
+
+input[type=button] {
+	color: white;
+	appearance: none;
+	-webkit-appearance: none;
+	padding: 1em;
+	font-size: 1em;
+	max-width: 100%;
+	box-sizing: border-box;
+	white-space: pre-wrap;
+	background: #34657d;
+	border: 0;
+	border-radius: 1em;
+	margin-bottom: 20px;
+	margin-left: 1em;
+}
+
+input[type=button]:active {
+	position: relative;
+	top: 4px;
+	box-shadow: 3px 1px 0px 1px #1C2C34;
+}
+
+input[type=button]:focus {
+	outline: none;
 }

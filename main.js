@@ -1,20 +1,20 @@
 var Game = function(startButton) {
+	this.initialScreenSize = window.innerHeight;
 	startButton.style.display = 'none';
 	this.input = document.createElement('textarea');
 	this.canvas = document.createElement('canvas');
 	this.ctx = this.canvas.getContext('2d');
-	this.setUpCanvas(this.canvas, this.ctx);
 	this.nextBtn = document.querySelector('.next');
 	this.endBtn = document.querySelector('.finish');
 	this.turns = [];
 	this.inputArea = document.getElementById('user-input');
 	this.displayArea = document.getElementById('display-area');
 	this.displayArea.innerHTML = '';
-	this.nextBtn.style.display = 'block';
+	this.nextBtn.style.display = 'inline';
 	this.nextClick = this.nextClick.bind(this);
 	this.nextBtn.addEventListener('click', this.nextClick);
 	this.endGame = this.endGame.bind(this);
-	this.endBtn.style.display = 'block';
+	this.endBtn.style.display = 'inline';
 	this.endBtn.addEventListener('click', this.endGame);
 	this.startNewTurn();
 }
@@ -47,11 +47,12 @@ Game.prototype.showPreviousUserInput = function() {
 Game.prototype.endGame = function(e) {
 	e.preventDefault();
 	this.recordValue();
-	document.querySelector('.start').style.display = 'block';
+	document.querySelector('.start').style.display = 'inline';
 	this.nextBtn.style.display = 'none';
 	this.nextBtn.removeEventListener('click', this.nextClick);
 	this.endBtn.style.display = 'none';
 	this.endBtn.removeEventListener('click', this.endGame);
+	this.displayArea.classList.add('finished')
 	this.displayEndOfGame();
 }
 Game.prototype.displayEndOfGame = function() {
@@ -62,12 +63,58 @@ Game.prototype.displayEndOfGame = function() {
 	})
 }
 
+
+Game.prototype.setUpCanvas = function(ctx) {
+	function move(e) {
+		e.preventDefault();
+		var x = e.offsetX;
+		var y = e.offsetY;
+		if (e.type === 'touchmove') {
+			x = e.targetTouches[0].clientX - e.target.offsetLeft;
+			y = e.targetTouches[0].clientY - e.target.offsetTop;
+		}
+		ctx.lineTo(x, y);
+		ctx.stroke();
+	}
+	function start(e) {
+		e.preventDefault();
+		ctx.strokeStyle = "#1C2C34";
+		ctx.lineJoin = "round";
+		ctx.lineWidth = 2;
+		if (this.width !== this.clientWidth || this.height !== this.clientHeight) {
+			this.width = this.clientWidth;
+			this.height = this.clientHeight;
+		}
+		var x = e.offsetX;
+		var y = e.offsetY;
+		if (e.type === 'touchstart') {
+			x = e.targetTouches[0].clientX - e.target.offsetLeft;
+			y = e.targetTouches[0].clientY - e.target.offsetTop;
+		}
+		ctx.beginPath();
+		ctx.moveTo(x, y);
+		ctx.canvas.addEventListener('mousemove', move);
+		ctx.canvas.addEventListener('touchmove', move);
+	}
+	function stop(e) {
+		ctx.canvas.removeEventListener('mousemove', move);
+		ctx.canvas.removeEventListener('touchmove', move);
+		ctx.closePath();
+	}
+	ctx.canvas.addEventListener('mousedown', start);
+	ctx.canvas.addEventListener('mouseup', stop);
+	ctx.canvas.addEventListener('mouseleave', stop);
+	ctx.canvas.addEventListener('touchstart', start);
+	ctx.canvas.addEventListener('touchend', stop);
+}
+
 var Turn = function(n, game) {
 	game.inputArea.innerHTML = '';
 	if (n % 2) {
 		this.type = 'img';
 		this.el = document.createElement('img');
 		game.inputArea.appendChild(game.canvas);
+		game.setUpCanvas(game.ctx)
 	} else {
 		this.type = 'h2';
 		this.el = document.createElement('h2');
@@ -92,49 +139,21 @@ Turn.prototype.setValue = function(val) {
 
 var game;
 
+
+
 document.querySelector('input').addEventListener('click', function(e) {
 	e.preventDefault();
 	game = new Game(this);
-})
-
-Game.prototype.setUpCanvas = function(canvas, ctx) {
-	function draw(ctx, e) {
-		if (!e.x) {
-			e.x = e.touches[0].clientX;
-			e.y = e.touches[0].clientY;
+	window.addEventListener('resize', function(e) {
+		var shiftY = game.initialScreenSize - e.target.innerHeight
+		console.log(shiftY);
+		if (shiftY > 0 && game.displayArea.innerHTML !== '') {
+			document.body.style.height = 'calc(100vh + ' + shiftY + 'px)'
+			document.body.style.overflowY = 'scroll'
+			document.body.style.transform = 'translateY(-'+shiftY+'px)'
+		} else {
+			document.body.style.height = '100vh'
+			document.body.style.transform = 'none'
 		}
-		ctx.lineTo(e.x-canvas.offsetLeft, e.y-canvas.offsetTop);
-		ctx.stroke();
-	}
-
-	var w = window,
-	    d = document,
-	    e = d.documentElement,
-	    g = d.getElementsByTagName('body')[0],
-	    x = w.innerWidth || e.clientWidth || g.clientWidth,
-	    y = w.innerHeight|| e.clientHeight|| g.clientHeight,
-			drawFn = draw.bind(null, ctx);
-	canvas.width = x-4;
-	canvas.height = y/4*3;
-
-	canvas.addEventListener('mousedown', function(e) {
-		ctx.moveTo(e.x-canvas.offsetLeft, e.y-canvas.offsetTop);
-		ctx.beginPath()
-		document.addEventListener('mouseup', function() {
-			canvas.removeEventListener('mousemove', drawFn);
-			ctx.closePath();
-		})
-		canvas.addEventListener('mousemove', drawFn)
 	})
-
-	canvas.addEventListener("touchstart", function(e) {
-		e.preventDefault();
-		ctx.moveTo(e.x-canvas.offsetLeft, e.y-canvas.offsetTop);
-		ctx.beginPath()
-		canvas.addEventListener('touchend', function() {
-			canvas.removeEventListener('touchmove', drawFn);
-			ctx.closePath();
-		})
-		canvas.addEventListener('touchmove', drawFn);
-	})
-}
+})
